@@ -14,26 +14,17 @@
     <style>
       body {
         margin-top: 50px;
-        padding-top:50px;
+        padding-top: 50px;
       }
       .navbar-brand { font-size: bold;}
     </style>
 
     <!-- Optional theme -->
     <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 
-    <!-- Latest compiled and minified JavaScript -->
-    <script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-
-    <!-- Just for debugging purposes. Don't actually copy this line! -->
-    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
-
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
-
+    <!-- timepicker -->
+    <link rel="stylesheet" href="assets/css/bootstrap-datetimepicker.min.css">
   </head>
 
   <body>
@@ -58,11 +49,25 @@
       </div>
     </div>
 
-    <div class="container">
-
+    <div class="container" id="container">
       <div class="starter-template">
-        <h1>Bootstrap starter template</h1>
-        <p class="lead">Use this document as a way to quickly start any new project.<br> All you get is this text and a mostly barebones HTML document.</p>
+        <h1>Street sweeping stuff</h1>
+        <h2>What time?</h2>
+
+        <form id="form_id" action="index.html" method="post">
+          <div class="well">
+            <div id="datetimepicker3" class="input-append">
+              <input data-format="hh:mm:ss" type="text"></input>
+              <span class="add-on">
+                <i data-time-icon="icon-time" data-date-icon="icon-calendar">
+                </i>
+              </span>
+            </div>
+          </div>
+
+        </form>
+        <a href="#" class="btn btn-primary">Use current time</a>
+
       </div>
 
     </div><!-- /.container -->
@@ -73,7 +78,93 @@
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.4.6/d3.js"></script>
+    <script src="assets/js/bootstrap-datetimepicker.min.js"></script>
+
+    <!-- Just for debugging purposes. Don't actually copy this line! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+ <script type="text/javascript" charset="utf-8">
+
+   /*
+   * Returns true if it's sweeping time
+   * Returns false if it's not sweeping time
+   * arugments strings of time eg "11:00:23" or "13:37:01"
+   */
+   function isItSweepingTime(now, start, end) {
+      var temp = "October 13, 1975";
+      var startTime = new Date("October 13, 1975 "+ start);
+      //console.log("starttime" + startTime);
+      var nowTime = new Date(temp + " " + now);
+      //console.log("nowtime" + nowTime);
+      var endTime = new Date("October 13, 1975 " + end);
+      //console.log("endtime" + endTime);
+      if ((startTime <= nowTime) && (nowTime <= endTime)) {
+        return true;
+      }
+      //if not sweeping time, return false
+      return false;
+   }
+
+
+    var now = new Date();
+    now = new Date('Mon Oct 13 1975 16:20:00 GMT-0700 (PDT)'); //temporarily manually set date and time
+    var stringNow = now.getHours().toString() + ":" + now.getMinutes().toString() + ":" + now.getSeconds().toString();
+
+
+   d3.csv("data/boston-street-sweeping-schedules.csv", function(data) {
+    data = data.filter(function(row) {
+        //filter down csv to only listings that are currently happening.
+        return isItSweepingTime(stringNow, row['StartTime'], row['EndTime']);
+    })
+    // the columns you'd like to display
+    var columns = ["Street","from","to","StartTime","EndTime"];
+    //console.log(columns);
+    var table = d3.select("#container").append("table"),
+        thead = table.append("thead"),
+        tbody = table.append("tbody");
+
+    // append the header row
+    thead.append("tr")
+        .selectAll("th")
+        .data(columns)
+        .enter()
+        .append("th")
+            .text(function(column) { return column; });
+
+    // create a row for each object in the data
+    var rows = tbody.selectAll("tr")
+        .data(data)
+        .enter()
+        .append("tr");
+
+    // create a cell in each row for each column
+    var cells = rows.selectAll("td")
+        .data(function(row) {
+            return columns.map(function(column) {
+                return {column: column, value: row[column]};
+            });
+        })
+        .enter()
+        .append("td")
+            .text(function(d) { return d.value; });
+  });
+ </script>
+
+<!-- timepicker js -->
+<script type="text/javascript">
+  $(function() {
+    $('#datetimepicker3').datetimepicker({
+      pickDate: false
+    });
+  });
+</script>
 
     </body>
 </html>
