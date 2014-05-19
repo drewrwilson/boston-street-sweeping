@@ -22,9 +22,8 @@
     <!-- Optional theme -->
     <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
     <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://jdewit.github.io/bootstrap-timepicker/css/bootstrap-timepicker.min.css">
 
-    <!-- timepicker -->
-    <link rel="stylesheet" href="assets/css/bootstrap-datetimepicker.min.css">
   </head>
 
   <body>
@@ -54,22 +53,17 @@
         <h1>Street sweeping stuff</h1>
         <h2>What time?</h2>
 
-        <form id="form_id" action="index.html" method="post">
           <div class="well">
-            <div id="datetimepicker3" class="input-append">
-              <input data-format="hh:mm:ss" type="text"></input>
-              <span class="add-on">
-                <i data-time-icon="icon-time" data-date-icon="icon-calendar">
-                </i>
-              </span>
-            </div>
+            <!-- <input id="time" type="text" name="time" size="50"/> -->
+            <input id="time" type="text" name="start_time" class="timepicker" placeholder="h:mm PM" data-default-time="false">
+            <a id="time-button" href="javascript:void(0)" class="btn btn-primary">Filter</a>
           </div>
 
-        </form>
-        <a href="#" class="btn btn-primary">Use current time</a>
 
       </div>
+      <div id="results">
 
+      </div>
     </div><!-- /.container -->
 
 
@@ -80,7 +74,8 @@
     <!-- Latest compiled and minified CSS -->
     <script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.4.6/d3.js"></script>
-    <script src="assets/js/bootstrap-datetimepicker.min.js"></script>
+    <script src="assets/js/bootstrap-timepicker.js"></script>
+
 
     <!-- Just for debugging purposes. Don't actually copy this line! -->
     <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
@@ -90,6 +85,7 @@
       <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
       <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
+
  <script type="text/javascript" charset="utf-8">
 
    /*
@@ -112,11 +108,9 @@
       return false;
    }
 
-
-    var now = new Date();
-    now = new Date('Mon Oct 13 1975 16:20:00 GMT-0700 (PDT)'); //temporarily manually set date and time
+  function loadData (now) {
     var stringNow = now.getHours().toString() + ":" + now.getMinutes().toString() + ":" + now.getSeconds().toString();
-
+    console.log(stringNow);
 
    d3.csv("data/boston-street-sweeping-schedules.csv", function(data) {
     data = data.filter(function(row) {
@@ -126,7 +120,8 @@
     // the columns you'd like to display
     var columns = ["Street","from","to","StartTime","EndTime"];
     //console.log(columns);
-    var table = d3.select("#container").append("table"),
+    d3.select("#results").html(null);
+    var table = d3.select("#results").append("table"),
         thead = table.append("thead"),
         tbody = table.append("tbody");
 
@@ -154,17 +149,30 @@
         .enter()
         .append("td")
             .text(function(d) { return d.value; });
-  });
+    });
+  }
  </script>
 
-<!-- timepicker js -->
-<script type="text/javascript">
-  $(function() {
-    $('#datetimepicker3').datetimepicker({
-      pickDate: false
-    });
-  });
-</script>
+<script type="text/javascript" charset="utf-8">
+/*
+*
+* This snippet is for handling text input
+*
+*/
+$( "#time-button" ).click(function() {
+  //alert( "Handler for .click() called." + "Value: " + $('#time').val() );
+  var inputDate = new Date('Mon Oct 13 1975 ' + $('#time').val() + ' GMT-0700 (PDT)');
+  console.log(inputDate);
+  loadData(inputDate);
 
+});
+
+var now = new Date();
+
+$(document).ready(function () {
+  $('#time').timepicker();
+  loadData(now)
+});
+</script>
     </body>
 </html>
